@@ -1,1 +1,2 @@
 qwikidata
+wikidata

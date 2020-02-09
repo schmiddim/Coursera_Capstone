@@ -2,7 +2,7 @@ from qwikidata.entity import WikidataItem, WikidataLexeme, WikidataProperty
 from qwikidata.linked_data_interface import get_entity_dict_from_api
 from hashlib import md5
 import pandas as pd
-
+from wikidata.client import Client
 
 class WikiDataWrapper:
     def __init__(self, entity_id):
@@ -16,18 +16,14 @@ class WikiDataWrapper:
         """
         Returns url to the full image path
         @see https://stackoverflow.com/a/34402875
-        :param city:
         :return:
         """
+        client = Client()
+        entity = client.get(self.entity_id, load=True)
 
-        def make_md5(s, encoding='utf-8'):
-            return md5(s.encode(encoding)).hexdigest()
-
-        filename = self.entity.get("claims").get("P18")[0].get('mainsnak').get('datavalue').get('value')
-        filename = filename.replace(" ", "_")
-        sum = make_md5(filename)
-        url = "https://upload.wikimedia.org/wikipedia/commons/{}/{}/{}".format(sum[0], sum[:2], filename)
-        return url
+        image_prop= client.get("P18")
+        image = entity[image_prop]
+        return image.image_url
 
     def get_coordinate_location(self):
         """
@@ -122,6 +118,9 @@ Q_TRIER = "Q3138"
 cities = [Q_TRIER, Q_SAARBRUECKEN, Q_MUNICH, Q_VENICE, Q_BARCELONA, "Q727","Q1218","Q2103", "Q2066", "Q60", "Q35765", "Q23768"]
 df_cities = pd.DataFrame()
 
+#wrapper = WikiDataWrapper(Q_VENICE)
+#s = wrapper.get_image_from_entity_dict()
+#+print(s)
 for city in cities:
    wrapper = WikiDataWrapper(city)
    df_cities = df_cities.append(wrapper.get_series_for_data_frame(), ignore_index=True)
