@@ -130,9 +130,15 @@ wrapper = WikiDataWrapper(Q_VENICE)
 
 wrapper.get_boroughs()
 print(df_cities)
-area = wrapper.get_area()
-population = wrapper.get_population()
-lat, lon = wrapper.get_coordinate_location()
-img = (wrapper.get_image_from_entity_dict())
-density = wrapper.get_population_density()
+
+path_name="cities_with_wikidata.json"
+
+df_cities.to_json(path_or_buf=path_name)
+print("exported to", path_name)
+
+#area = wrapper.get_area()
+#population = wrapper.get_population()
+#lat, lon = wrapper.get_coordinate_location()
+#img = (wrapper.get_image_from_entity_dict())
+#density = wrapper.get_population_density()
 # print(wrapper.get_name())
