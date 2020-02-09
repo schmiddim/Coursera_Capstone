@@ -2,6 +2,11 @@ from qwikidata.sparql import return_sparql_query_results
 
 
 def get_entity_id_for_city_by_name(city_name):
+    """
+
+    :param city_name:
+    :return: string Wikidata entity_id
+    """
     sparql_query = """
     SELECT ?item ?itemLabel
     WHERE {{ 
@@ -15,26 +20,27 @@ def get_entity_id_for_city_by_name(city_name):
     url = res.get("results").get("bindings")[0].get('item').get('value')
 
     return url.replace('http://www.wikidata.org/entity/', '')
+
+
 cities = [
-'Trier',
-'Saarbrücken',
-'Venedig',
-'Amsterdam',
-'Jerusalem',
-'Munich',
-'Bochum',
-'Essen',
-'New York',
-'Osaka',
-'LAS VEGAS',
-'Barcelona',
+    'Trier',
+    'Saarbrücken',
+    'Venedig',
+    'Amsterdam',
+    'Jerusalem',
+    'Munich',
+    'Bochum',
+    'Essen',
+    'New York',
+    'Osaka',
+    'LAS VEGAS',
+    'Barcelona',
 ]
 
 for city in cities:
     r = get_entity_id_for_city_by_name(city_name=city)
-    print(city,r )
+    print(city, r)
 
 city = "Berlin"
 r = get_entity_id_for_city_by_name(city_name=city)
 print(r)
-

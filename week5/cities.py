@@ -1,8 +1,7 @@
-from qwikidata.entity import WikidataItem, WikidataLexeme, WikidataProperty
 from qwikidata.linked_data_interface import get_entity_dict_from_api
-from hashlib import md5
 import pandas as pd
 from wikidata.client import Client
+
 
 class WikiDataWrapper:
     def __init__(self, entity_id):
@@ -21,7 +20,7 @@ class WikiDataWrapper:
         client = Client()
         entity = client.get(self.entity_id, load=True)
 
-        image_prop= client.get("P18")
+        image_prop = client.get("P18")
         image = entity[image_prop]
         return image.image_url
 
@@ -69,11 +68,10 @@ class WikiDataWrapper:
         property = self.entity.get("claims").get("P150")
         # @Todo Q_TRIER = "Q3138" has NO P150
         if property is None:
-            print(self.entity_id , "has no P150")
+            print(self.entity_id, "has no P150")
             return []
         bourough_ids = []
         bouroughs = []
-
 
         for item in property:
             entity = item.get("mainsnak").get("datavalue").get('value').get('id')
@@ -88,10 +86,9 @@ class WikiDataWrapper:
             else:
                 bourough_name = entity.get('labels').get("en").get("value")
             property = entity.get("claims").get("P625")[0].get('mainsnak').get('datavalue').get('value')
-            lat,lon= property.get('latitude'), property.get('longitude')
+            lat, lon = property.get('latitude'), property.get('longitude')
 
-            bouroughs.append( {"Name": bourough_name , "Lat": lat, "Lon": lon})
-
+            bouroughs.append({"Name": bourough_name, "Lat": lat, "Lon": lon})
 
         return bouroughs
 
@@ -105,7 +102,7 @@ class WikiDataWrapper:
                 'Lat': lat,
                 'Lon': lon,
                 'Image': self.get_image_from_entity_dict(),
-                "Bouroughs" : self.get_boroughs()
+                "Bouroughs": self.get_boroughs()
                 }
 
 
@@ -115,29 +112,30 @@ Q_BARCELONA = "Q1492"
 Q_SAARBRUECKEN = "Q1724"
 Q_TRIER = "Q3138"
 
-cities = [Q_TRIER, Q_SAARBRUECKEN, Q_MUNICH, Q_VENICE, Q_BARCELONA, "Q727","Q1218","Q2103", "Q2066", "Q60", "Q35765", "Q23768"]
+cities = [Q_TRIER, Q_SAARBRUECKEN, Q_MUNICH, Q_VENICE, Q_BARCELONA, "Q727", "Q1218", "Q2103", "Q2066", "Q60", "Q35765",
+          "Q23768"]
 df_cities = pd.DataFrame()
 
-#wrapper = WikiDataWrapper(Q_VENICE)
-#s = wrapper.get_image_from_entity_dict()
-#+print(s)
+# wrapper = WikiDataWrapper(Q_VENICE)
+# s = wrapper.get_image_from_entity_dict()
+# +print(s)
 for city in cities:
-   wrapper = WikiDataWrapper(city)
-   df_cities = df_cities.append(wrapper.get_series_for_data_frame(), ignore_index=True)
+    wrapper = WikiDataWrapper(city)
+    df_cities = df_cities.append(wrapper.get_series_for_data_frame(), ignore_index=True)
 
 wrapper = WikiDataWrapper(Q_VENICE)
 
 wrapper.get_boroughs()
 print(df_cities)
 
-path_name="cities_with_wikidata.json"
+path_name = "cities_with_wikidata.json"
 
 df_cities.to_json(path_or_buf=path_name)
 print("exported to", path_name)
 
-#area = wrapper.get_area()
-#population = wrapper.get_population()
-#lat, lon = wrapper.get_coordinate_location()
-#img = (wrapper.get_image_from_entity_dict())
-#density = wrapper.get_population_density()
+# area = wrapper.get_area()
+# population = wrapper.get_population()
+# lat, lon = wrapper.get_coordinate_location()
+# img = (wrapper.get_image_from_entity_dict())
+# density = wrapper.get_population_density()
 # print(wrapper.get_name())
