@@ -1,7 +1,7 @@
 from qwikidata.linked_data_interface import get_entity_dict_from_api
 import pandas as pd
 from wikidata.client import Client
-
+import os.path
 
 class WikiDataWrapper:
     def __init__(self, entity_id):
@@ -65,13 +65,18 @@ class WikiDataWrapper:
          https://www.wikidata.org/wiki/Property:P150        contains administrative territorial entity
         :return:
         """
+        bourough_ids = []
+        bouroughs = []
+
         property = self.entity.get("claims").get("P150")
         # @Todo Q_TRIER = "Q3138" has NO P150
         if property is None:
+
             print(self.entity_id, "has no P150")
-            return []
-        bourough_ids = []
-        bouroughs = []
+            lat, lon = self.get_coordinate_location()
+            bouroughs.append({"Name": self.get_name(), "Lat": lat, "Lon": lon})
+            return bouroughs
+
 
         for item in property:
             entity = item.get("mainsnak").get("datavalue").get('value').get('id')
@@ -106,32 +111,30 @@ class WikiDataWrapper:
                 }
 
 
-Q_VENICE = "Q641"
-Q_MUNICH = "Q1726"
-Q_BARCELONA = "Q1492"
-Q_SAARBRUECKEN = "Q1724"
-Q_TRIER = "Q3138"
 
-cities = [Q_TRIER, Q_SAARBRUECKEN, Q_MUNICH, Q_VENICE, Q_BARCELONA, "Q727", "Q1218", "Q2103", "Q2066", "Q60", "Q35765",
+cities = ["Q3138", "Q1724",  "Q1726",   "Q1492", "Q727", "Q1218", "Q2103", "Q2066", "Q60", "Q35765",
           "Q23768"]
 df_cities = pd.DataFrame()
 
 # wrapper = WikiDataWrapper(Q_VENICE)
 # s = wrapper.get_image_from_entity_dict()
 # +print(s)
-for city in cities:
-    wrapper = WikiDataWrapper(city)
-    df_cities = df_cities.append(wrapper.get_series_for_data_frame(), ignore_index=True)
-
-wrapper = WikiDataWrapper(Q_VENICE)
-
-wrapper.get_boroughs()
-print(df_cities)
 
 path_name = "cities_with_wikidata.json"
 
-df_cities.to_json(path_or_buf=path_name)
-print("exported to", path_name)
+if not os.path.exists(path_name):
+    print("Cache miss")
+    for city in cities:
+        wrapper = WikiDataWrapper(city)
+        df_cities = df_cities.append(wrapper.get_series_for_data_frame(), ignore_index=True)
+
+    df_cities.to_json(path_or_buf=path_name)
+with open(path_name, 'r') as f:
+    df_cities = pd.read_json(path_name)
+
+print(df_cities)
+
+
 
 # area = wrapper.get_area()
 # population = wrapper.get_population()
